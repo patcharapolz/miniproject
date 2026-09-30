@@ -1,0 +1,6 @@
+opencv-python
+numpy
+ultralytics
+paho-mqtt
+kafka-python
+influxdb-client

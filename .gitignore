@@ -1,0 +1,20 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Secrets - ห้ามขึ้น git เด็ดขาด
+.env
+
+# ไฟล์วิดีโอ/โมเดลขนาดใหญ่ - ใช้ Git LFS หรือแนบลิงก์ดาวน์โหลดแยกแทน
+data/*.mp4
+runs/
+
+*.docx
+*.Python
+*.draw.io
+*.bkp
+
+# OS
+.DS_Store
+Thumbs.db

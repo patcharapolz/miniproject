@@ -1,0 +1,55 @@
+services:
+  detector:
+    build:
+      context: .
+      dockerfile: Dockerfile.detector
+
+    container_name: crosswalk-detector
+
+    environment:
+      SOURCE_PATH: /app/data/Train1.mp4
+      GENERAL_MODEL_PATH: yolov8m.pt
+      TRAFFIC_MODEL_PATH: /app/models/best.pt
+      TRAFFIC_MODEL_IMGSZ: "640"
+      TRAFFIC_CONF_THRESHOLD: "0.35"
+      CONF_THRESHOLD: "0.4"
+      HEADLESS: "false"
+
+      MQTT_BROKER_IP: ${MQTT_BROKER_IP:-172.16.2.117}
+      MQTT_BROKER_PORT: ${MQTT_BROKER_PORT:-1883}
+      MQTT_TOPIC: ${MQTT_TOPIC:-crosswalk-event-6510301037}
+      MQTT_CLIENT_ID: ${MQTT_CLIENT_ID:-GW_6510301037}
+
+    volumes:
+      - ./data:/app/data:ro
+      - ./model:/app/models:ro
+
+    restart: unless-stopped
+
+    depends_on:
+      - bridge
+
+  bridge:
+    build:
+      context: .
+      dockerfile: Dockerfile.bridge
+
+    container_name: crosswalk-bridge
+    
+    environment:
+      MQTT_BROKER_IP: ${MQTT_BROKER_IP:-172.16.2.117}
+      MQTT_BROKER_PORT: ${MQTT_BROKER_PORT:-1883}
+      MQTT_TOPIC: ${MQTT_TOPIC:-crosswalk-event-6510301037}
+      MQTT_CLIENT_ID: ${MQTT_BRIDGE_CLIENT_ID:-mqtt-kafka-bridge-6510301037}
+
+      KAFKA_BROKER_IP: ${KAFKA_BROKER_IP:-172.16.2.117}
+      KAFKA_BROKER_PORT: ${KAFKA_BROKER_PORT:-9092}
+      KAFKA_TOPIC: ${KAFKA_TOPIC:-crosswalk-event-6510301037}
+
+      INFLUX_URL: ${INFLUX_URL:-http://172.16.2.117:8086}
+      INFLUX_TOKEN: ${INFLUX_TOKEN:?กรุณาตั้งค่า INFLUX_TOKEN ในไฟล์ config/.env ก่อนรัน}
+      INFLUX_ORG: ${INFLUX_ORG:-my-org}
+      INFLUX_BUCKET: ${INFLUX_BUCKET:-mini_project}
+      INFLUX_MEASUREMENT: ${INFLUX_MEASUREMENT:-crosswalk_6510301037}
+
+    restart: unless-stopped

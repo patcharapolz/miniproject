@@ -1,0 +1,23 @@
+# Dockerfile.detector — image สำหรับรัน final.py (ตรวจจับ + ติดตาม + ตรวจฝ่าไฟ + ส่ง MQTT)
+FROM python:3.11-slim
+
+# opencv ต้องการ shared library พวกนี้ตอน runtime ซึ่ง python:slim ไม่มีมาให้เป็นค่าเริ่มต้น
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgl1 \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY final.py custom_tracker.yaml ./
+
+# วิดีโอต้นฉบับและโมเดลไฟจราจร (best.pt) ไม่ copy เข้า image ตรงนี้ เพราะเป็นไฟล์ใหญ่และอาจเปลี่ยนบ่อย
+# ให้ mount เข้ามาด้วย volume ผ่าน docker-compose.yml แทน (ดู service "detector" ในนั้น)
+
+# ปิดหน้าต่างพรีวิว cv2.imshow โดยดีฟอลต์ เพราะ container ปกติไม่มีจอ/ไม่มี X server
+ENV HEADLESS=true
+
+CMD ["python", "final.py"]
